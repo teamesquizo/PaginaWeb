@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilidad CS2 kNz</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="fotosicono/iconoredondo.png">
+
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ff;
+            --neon-red: #ff003c;
+            --bg-dark: #050505;
+        }
+
+        /* Suaviza todos los movimientos de scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        @keyframes rgb-glow {
+            0% { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); }
+            33% { border-color: var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 255, 0.4); }
+            66% { border-color: var(--neon-red); box-shadow: 0 0 15px rgba(255, 0, 60, 0.4); }
+            100% { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); }
+        }
+
+        @keyframes float-bg {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(10%, 15%); }
+            50% { transform: translate(-5%, 20%); }
+            75% { transform: translate(-15%, -10%); }
+        }
+
+        @keyframes rgb-text {
+            0% { color: var(--neon-blue); text-shadow: 0 0 20px var(--neon-blue); }
+            33% { color: var(--neon-pink); text-shadow: 0 0 20px var(--neon-pink); }
+            66% { color: var(--neon-red); text-shadow: 0 0 20px var(--neon-red); }
+            100% { color: var(--neon-blue); text-shadow: 0 0 20px var(--neon-blue); }
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 100vh; /* Ocupa el 100% de la pantalla */
+        }
+
+        /* El main container se expande para empujar el footer */
+        .main-content {
+            flex: 1;
+            margin-top: 120px; /* Espacio para el navbar absolute */
+            padding-bottom: 50px;
+        }
+
+        /* ------------------------------------------- */
+
+        .cyber-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #111 0%, #050505 100%);
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float-bg 20s infinite alternate ease-in-out;
+        }
+
+        .orb-1 { background: var(--neon-blue); top: -10%; left: -10%; }
+        .orb-2 { background: var(--neon-pink); bottom: -10%; right: -10%; animation-delay: -5s; }
+        .orb-3 { background: var(--neon-red); top: 40%; left: 30%; animation-duration: 25s; opacity: 0.1; }
+
+        .grid {
+            position: absolute;
+            width: 200%; height: 200%;
+            top: -50%; left: -50%;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg);
+            z-index: -1;
+        }
+
+        /* --- NAVBAR ULTRA FLUIDO (SIN TOCAR) --- */
+        .nav-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            position: absolute;
+            top: 25px;
+            z-index: 9999;
+        }
+
+        .navbar-cyber {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            padding: 8px 25px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: transform, box-shadow;
+        }
+
+        .navbar-cyber:hover {
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+            border-color: rgba(0, 243, 255, 0.5);
+            transform: translateY(-2px) scale(1.01);
+            background: rgba(0, 20, 30, 0.7);
+        }
+
+        .navbar-brand img { 
+            height: 40px; 
+            transition: none;
+        }
+
+        .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: #888 !important;
+            margin: 0 12px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 1px;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--neon-blue);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .nav-link:hover::after { width: 80%; }
+
+        .nav-link:hover {
+            color: #fff !important;
+            text-shadow: 0 0 12px var(--neon-blue);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            color: var(--neon-blue) !important;
+            text-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        /* --- FOOTER (SIN TOCAR) --- */
+        .footer-cyber {
+            text-align: center;
+            padding: 50px 0;
+            background: #030303;
+            border-top: 1px solid #111;
+            margin-top: 100px;
+        }
+
+        .footer-logo {
+            height: 70px;
+            transition: 0.4s;
+            filter: grayscale(0.2);
+        }
+
+        .footer-logo:hover {
+            filter: grayscale(0) drop-shadow(0 0 15px var(--neon-pink));
+            transform: scale(1.1);
+        }
+
+        .social-links a {
+            text-decoration: none !important; 
+            display: inline-block;
+        }
+
+        .social-circle {
+            width: 50px;
+            height: 50px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            margin: 0 10px;
+            font-size: 1.3rem;
+            transition: 0.3s;
+        }
+
+        .social-circle:hover {
+            color: #fff;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue);
+            transform: translateY(-5px);
+        }
+
+        .footer-nav a {
+            color: #444;
+            text-decoration: none !important;
+            margin: 0 15px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .footer-nav a:hover { 
+            color: var(--neon-pink) !important;
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .noUi-target { background: #1a1a1a; border: none; height: 6px; }
+        .noUi-connect { background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink)); }
+        .noUi-handle { border-radius: 50% !important; background: #fff !important; width: 18px !important; height: 18px !important; border: none !important; }
+        .noUi-handle::before, .noUi-handle::after { display: none !important; }
+    </style>
+<body class="bg-light">
+
+    <div class="cyber-bg">
+        <div class="grid"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="nav-wrapper">
+        <nav class="navbar navbar-expand navbar-cyber">
+            <a class="navbar-brand me-4" href="index.html">
+                <img src="fotosicono/icono.png" alt="Logo">
+            </a>
+            <div class="navbar-nav align-items-center">
+                <a class="nav-link" href="index.html">INICIO</a>
+                <a class="nav-link" href="youknztube.html">YOUKNZTUBE</a>
+                <a class="nav-link active" href="utilidadcounter.html">UTILIDAD COUNTER</a>
+                <a class="nav-link" href="rustknz.html">RAID RUST</a>
+            </div>
+        </nav>
+    </div>
+
+    <main class="main-content container">
+        <h2 class="text-center mb-2" style="animation: rgb-text 5s infinite; font-family: 'Orbitron';">
+            Utilidad kNz - Counter Strike 2
+        </h2>
+
+        <div class="text-center mb-5">
+            <span class="badge border border-info text-info p-2" style="letter-spacing: 3px; background: rgba(0,243,255,0.1); font-family: 'Orbitron'; font-size: 0.8rem;">
+                <i class="fas fa-tools me-2"></i> PROXIMAMENTE PAGINA EN MANTENIMIENTO
+            </span>
+        </div>
+        
+        <div class="row g-2" id="contenedor-mapas"></div>
+
+        <div id="seccion-fotos" class="mt-5" style="display: none;">
+            <hr style="border-color: rgba(255,255,255,0.1);">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 id="nombre-mapa-seleccionado" class="m-0">Mapa</h3>
+                <button class="btn btn-dark btn-sm border" onclick="volverAMapas()">← Volver a Mapas</button>
+            </div>
+
+            <div class="btn-group w-100 mb-4" role="group">
+                <button type="button" class="btn btn-outline-secondary active" onclick="filtrarUtilidad('todos')">Todos</button>
+                <button type="button" class="btn btn-outline-primary" onclick="filtrarUtilidad('humo')">Humos</button>
+                <button type="button" class="btn btn-outline-danger" onclick="filtrarUtilidad('molo')">Molos</button>
+                <button type="button" class="btn btn-outline-warning" onclick="filtrarUtilidad('flash')">Flashes</button>
+            </div>
+            
+            <div class="row g-3" id="galeria-fotos"></div>
+        </div>
+    </main>
+
+    <div class="neon-divider" style="
+        background: linear-gradient(90deg, transparent, #00f3ff, #ff00ff, #00f3ff, transparent); 
+        height: 3px; 
+        width: 100%; 
+        position: relative; 
+        z-index: 999;
+        margin: 0; 
+        transform: translateY(100px); /* <--- CAMBIA ESTE 0 POR 10, 20, -10, -50... EL QUE QUIERAS */
+        box-shadow: 0 0 15px #00f3ff;
+    "></div>
+    <footer class="footer-cyber">
+        <div class="container">
+            <img src="fotosicono/icono.png" alt="Logo" class="footer-logo mb-4">
+            <div class="footer-nav mb-4">
+                <a href="#">Privacidad</a>
+                <a href="#">Términos</a>
+                <a href="#">Soporte</a>
+                <a href="#">API</a>
+            </div>
+            <div class="social-links d-flex justify-content-center mb-4">
+                <a href="https://discord.gg/yourlink" target="_blank">
+                    <div class="social-circle"><i class="fab fa-discord"></i></div>
+                </a>
+                <a href="https://steamcommunity.com/id/OfficialCoriGarcia/" target="_blank">
+                    <div class="social-circle"><i class="fab fa-steam"></i></div>
+                </a>
+                <a href="https://www.twitch.tv/officialknz" target="_blank">
+                    <div class="social-circle"><i class="fab fa-twitch"></i></div>
+                </a>
+            </div>
+            <div class="text-muted small" style="letter-spacing: 2px;">
+                © 2026 OFFICIALKNZ ENTERTAINMENT
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
+    <script src="logicacounter.js"></script>
+</html>

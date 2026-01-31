@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YoukNzTube</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="fotosicono/iconoredondo.png">
+
+    <style>
+        :root {
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00ff;
+            --neon-red: #ff003c;
+            --bg-dark: #050505;
+        }
+
+        /* Suaviza todos los movimientos de scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+
+        @keyframes rgb-glow {
+            0% { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); }
+            33% { border-color: var(--neon-pink); box-shadow: 0 0 15px rgba(255, 0, 255, 0.4); }
+            66% { border-color: var(--neon-red); box-shadow: 0 0 15px rgba(255, 0, 60, 0.4); }
+            100% { border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); }
+        }
+
+        @keyframes float-bg {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(10%, 15%); }
+            50% { transform: translate(-5%, 20%); }
+            75% { transform: translate(-15%, -10%); }
+        }
+
+        @keyframes rgb-text {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 120vh; 
+        }
+
+        .cyber-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #111 0%, #050505 100%);
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float-bg 20s infinite alternate ease-in-out;
+        }
+
+        .orb-1 { background: var(--neon-blue); top: -10%; left: -10%; }
+        .orb-2 { background: var(--neon-pink); bottom: -10%; right: -10%; animation-delay: -5s; }
+        .orb-3 { background: var(--neon-red); top: 40%; left: 30%; animation-duration: 25s; opacity: 0.1; }
+
+        .grid {
+            position: absolute;
+            width: 200%; height: 200%;
+            top: -50%; left: -50%;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg);
+            z-index: -1;
+        }
+
+        /* --- NAVBAR ULTRA FLUIDO --- */
+        .nav-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            position: absolute;
+            top: 25px;
+            z-index: 9999;
+        }
+
+        .navbar-cyber {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            padding: 8px 25px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            /* Transición fluida a 60fps */
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: transform, box-shadow;
+        }
+
+        .navbar-cyber:hover {
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
+            border-color: rgba(0, 243, 255, 0.5);
+            transform: translateY(-2px) scale(1.01);
+            background: rgba(0, 20, 30, 0.7); /* Ligero tinte al pasar el ratón */
+        }
+
+        .navbar-brand img { 
+            height: 40px; 
+            transition: none; /* Logo estático */
+        }
+
+        .nav-link {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: #888 !important;
+            margin: 0 12px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 1px;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--neon-blue);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .nav-link:hover::after { width: 80%; }
+
+        .nav-link:hover {
+            color: #fff !important;
+            text-shadow: 0 0 12px var(--neon-blue);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            color: var(--neon-blue) !important;
+            text-shadow: 0 0 15px var(--neon-blue);
+        }
+        /* --- FIN NAVBAR --- */
+
+        .main-container { 
+            padding-top: 180px; 
+            padding-bottom: 150px; 
+        }
+
+        .cyber-card {
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 2px solid;
+            animation: rgb-glow 6s linear infinite;
+        }
+
+        .input-group-cyber {
+            background: #000;
+            border-radius: 15px;
+            padding: 5px;
+            border: 1px solid #222;
+            display: flex;
+        }
+
+        .input-group-cyber input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 12px 20px;
+            flex-grow: 1;
+        }
+        .input-group-cyber input:focus { outline: none; }
+
+        .btn-rgb {
+            background: linear-gradient(-45deg, #ff003c, #ff00ff, #00f3ff, #00ff9d);
+            background-size: 300% 300%;
+            animation: rgb-text 4s ease infinite;
+            border: none;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .btn-rgb:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+
+        .time-display-box {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .time-value { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; color: #fff; }
+
+        .footer-cyber {
+            text-align: center;
+            padding: 50px 0;
+            background: #030303;
+            border-top: 1px solid #111;
+            margin-top: 100px;
+        }
+
+        .footer-logo {
+            height: 70px;
+            transition: 0.4s;
+            filter: grayscale(0.2);
+        }
+
+        .footer-logo:hover {
+            filter: grayscale(0) drop-shadow(0 0 15px var(--neon-pink));
+            transform: scale(1.1);
+        }
+
+        .social-links a {
+            text-decoration: none !important; 
+            display: inline-block;
+        }
+
+        .social-circle {
+            width: 50px;
+            height: 50px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            margin: 0 10px;
+            font-size: 1.3rem;
+            transition: 0.3s;
+        }
+
+        .social-circle:hover {
+            color: #fff;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue);
+            transform: translateY(-5px);
+        }
+
+        .footer-nav a {
+            color: #444;
+            text-decoration: none !important;
+            margin: 0 15px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .footer-nav a:hover { 
+            color: var(--neon-pink) !important;
+            text-shadow: 0 0 10px var(--neon-pink);
+        }
+
+        .noUi-target { background: #1a1a1a; border: none; height: 6px; }
+        .noUi-connect { background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink)); }
+        .noUi-handle { border-radius: 50% !important; background: #fff !important; width: 18px !important; height: 18px !important; border: none !important; }
+        .noUi-handle::before, .noUi-handle::after { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="cyber-bg">
+        <div class="grid"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="nav-wrapper">
+        <nav class="navbar navbar-expand navbar-cyber">
+            <a class="navbar-brand me-4" href="index.html">
+                <img src="fotosicono/icono.png" alt="Logo">
+            </a>
+            <div class="navbar-nav align-items-center">
+                <a class="nav-link" href="index.html">INICIO</a>
+                <a class="nav-link active" href="youknztube.html">YOUKNZTUBE</a>
+                <a class="nav-link" href="utilidadcounter.html">UTILIDAD COUNTER</a>
+                <a class="nav-link" href="rustknz.html">RAID RUST</a>
+            </div>
+        </nav>
+    </div>
+
+    <div class="container main-container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div id="main-app-card" class="cyber-card p-4 p-md-5 shadow-lg">
+                    
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold" style="font-family: 'Orbitron'; letter-spacing: 5px;">
+                            <span style="color: var(--neon-red)">YOU</span>KNZTUBE
+                        </h2>
+                        <div class="badge bg-dark text-neon-blue border border-info">SYSTEM_v4.0_STABLE</div>
+                    </div>
+
+                    <div class="input-group-cyber mb-5">
+                        <input type="text" id="entrada-url" placeholder="PEGAR ENLACE DE YOUTUBE AQUÍ...">
+                        <button class="btn btn-rgb px-4 m-1" onclick="verificarVideoReal()">ANALIZAR</button>
+                    </div>
+
+                    <div id="info-video" class="d-none mb-5">
+                        <div class="video-box border border-secondary rounded-3 overflow-hidden bg-black shadow">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-md-5">
+                                    <img id="img-miniatura" src="" alt="Video" class="img-fluid">
+                                </div>
+                                <div class="col-md-7 p-4">
+                                    <h5 id="titulo-video" class="text-white mb-2">---</h5>
+                                    <span class="text-muted small">DURACIÓN TOTAL:</span>
+                                    <span id="texto-duracion" class="ms-2 text-neon-pink fw-bold">00:00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <fieldset id="controles-tiempo" disabled>
+                        <div class="px-2 mb-5">
+                            <div id="slider-tiempo"></div>
+                        </div>
+                        
+                        <div class="row g-3 mb-5">
+                            <div class="col-6">
+                                <div class="time-display-box text-center">
+                                    <div class="time-label">Punto A</div>
+                                    <div id="display-inicio" class="time-value">00:00</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="time-display-box text-center">
+                                    <div class="time-label">Punto B</div>
+                                    <div id="display-fin" class="time-value">00:00</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-rgb py-3" onclick="descargarReal()">
+                                <i class="bi bi-download me-2"></i> INICIAR EXTRACCIÓN SÓNICA
+                            </button>
+                        </div>
+                    </fieldset>
+
+                    <div id="mensaje-estado" class="mt-4 text-center small"></div>
+
+                    <div id="zona-reiniciar" class="d-none mt-4 text-center">
+                        <button class="btn btn-link text-info text-decoration-none small" onclick="reiniciarApp()">
+                            <i class="bi bi-arrow-counterclockwise"></i> REINICIAR SISTEMA
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="neon-divider" style="
+        background: linear-gradient(90deg, transparent, #00f3ff, #ff00ff, #00f3ff, transparent); 
+        height: 3px; 
+        width: 100%; 
+        position: relative; 
+        z-index: 999;
+        margin: 0; 
+        transform: translateY(100px); /* <--- CAMBIA ESTE 0 POR 10, 20, -10, -50... EL QUE QUIERAS */
+        box-shadow: 0 0 15px #00f3ff;
+    "></div>
+    <footer class="footer-cyber">
+        <div class="container">
+            <img src="fotosicono/icono.png" alt="Logo" class="footer-logo mb-4">
+            
+            <div class="footer-nav mb-4">
+                <a href="#">Privacidad</a>
+                <a href="#">Términos</a>
+                <a href="#">Soporte</a>
+                <a href="#">API</a>
+            </div>
+
+            <div class="social-links d-flex justify-content-center mb-4">
+                <a href="https://discord.gg/yourlink" target="_blank">
+                    <div class="social-circle"><i class="fab fa-discord"></i></div>
+                </a>
+                <a href="https://steamcommunity.com/id/OfficialCoriGarcia/" target="_blank">
+                    <div class="social-circle"><i class="fab fa-steam"></i></div>
+                </a>
+                <a href="https://www.twitch.tv/officialknz" target="_blank">
+                    <div class="social-circle"><i class="fab fa-twitch"></i></div>
+                </a>
+            </div>
+
+            <div class="text-muted small" style="letter-spacing: 2px;">
+                © 2026 OFFICIALKNZ ENTERTAINMENT
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nouislider@14.6.3/distribute/nouislider.min.js"></script>
+    <script src="logicayt.js"></script>
+</body>
+</html>
