@@ -15,26 +15,26 @@ DOWNLOAD_FOLDER = os.path.join(BASE_DIR, 'descargas_temp')
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
 # --- RUTAS DE NAVEGACIÓN ---
-# Flask servirá los archivos directamente cuando Nginx se los pida
+# strict_slashes=False permite que /inicio y /inicio/ funcionen igual
 
-@app.route('/')
-@app.route('/inicio')
+@app.route('/', strict_slashes=False)
+@app.route('/inicio', strict_slashes=False)
 def index():
     return app.send_static_file('index.html')
 
-@app.route('/youknztube')
+@app.route('/youknztube', strict_slashes=False)
 def route_yt():
     return app.send_static_file('youknztube.html')
 
-@app.route('/rustknz')
+@app.route('/rustknz', strict_slashes=False)
 def route_rust():
     return app.send_static_file('rustknz.html')
 
-@app.route('/utilidad')
+@app.route('/utilidad', strict_slashes=False)
 def route_util():
     return app.send_static_file('utilidadcounter.html')
 
-# --- API DE DESCARGA ---
+# --- API DE DESCARGA (Lógica de YouTube) ---
 
 @app.route('/api/info', methods=['POST'])
 def get_info():
@@ -92,9 +92,6 @@ def descargar():
         def cleanup(response):
             try:
                 if os.path.exists(path_descargado): os.remove(path_descargado)
-                # El archivo_final se borra después de enviarlo si fuera necesario, 
-                # pero Flask send_file lo necesita abierto para el streaming.
-                # Lo ideal es una tarea programada, pero para poco tráfico está bien.
             except Exception as e:
                 print(f"Error limpiando: {e}")
             return response
@@ -112,7 +109,7 @@ def descargar():
         print(f"Error en descarga: {e}")
         return jsonify({'error': str(e)}), 500
 
-# --- CAPTURADOR GENÉRICO (Para JS, CSS, Fotos y .html directos) ---
+# --- CAPTURADOR GENÉRICO (JS, CSS, Imágenes) ---
 @app.route('/<path:path>')
 def static_proxy(path):
     try:
@@ -121,5 +118,4 @@ def static_proxy(path):
         return jsonify({'error': 'Archivo no encontrado'}), 404
 
 if __name__ == '__main__':
-    # Localhost en puerto 5000 para que Nginx lo vea
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='127.0.0.1', port=5000)
