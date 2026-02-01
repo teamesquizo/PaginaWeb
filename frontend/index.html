@@ -273,16 +273,29 @@
         .noUi-handle { border-radius: 50% !important; background: #fff !important; width: 18px !important; height: 18px !important; border: none !important; }
         .noUi-handle::before, .noUi-handle::after { display: none !important; }
 
-        /* Fondo cyberpunk */
+        /* Fondo cyberpunk optimizado */
         .cyberpunk-bg {
         position: fixed;
         inset: 0;
         z-index: -1;
+        background: 
+            radial-gradient(circle at 15% 80%, #ff2fdc33, transparent 45%),
+            radial-gradient(circle at 85% 80%, #2fdcff33, transparent 45%),
+            linear-gradient(135deg, #0a000f, #000a1a); /* Un tono más oscuro para mejor contraste */
+        overflow: hidden;
+        }
 
-        background:
-            radial-gradient(circle at 15% 80%, #ff2fdc55, transparent 45%),
-            radial-gradient(circle at 85% 80%, #2fdcff55, transparent 45%),
-            linear-gradient(135deg, #13001a, #00142a);
+        /* El toque minimalista: Rejilla de fondo */
+        .cyberpunk-bg::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        /* Creamos una cuadrícula usando gradientes repetitivos */
+        background-image: 
+            linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px; /* Tamaño de los cuadros */
+        mask-image: radial-gradient(ellipse at center, black, transparent 80%); /* Suaviza los bordes de la rejilla */
         }
 
     </style>
