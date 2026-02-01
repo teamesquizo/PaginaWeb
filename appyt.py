@@ -11,7 +11,7 @@ app = Flask(__name__, static_folder='frontend', static_url_path='')
 CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FFMPEG_EXE = "/usr/bin/ffmpeg"  # Usamos ffmpeg del sistema
+FFMPEG_EXE = "/usr/bin/ffmpeg"  # ffmpeg del sistema Linux
 DOWNLOAD_FOLDER = os.path.join(BASE_DIR, 'descargas_temp')
 
 if not os.path.exists(DOWNLOAD_FOLDER):
@@ -70,11 +70,13 @@ def descargar():
             info = ydl.extract_info(url, download=True)
             titulo_real = info.get('title', 'audio_knz')
 
-        # Recorte
+        # Recorte con conversión Linux-friendly
         duracion = fin - inicio
         subprocess.run([
             FFMPEG_EXE, '-y', '-ss', str(inicio), '-t', str(duracion),
-            '-i', archivo_completo, '-acodec', 'copy', archivo_recortado
+            '-i', archivo_completo,
+            '-vn', '-ar', '44100', '-ac', '2', '-b:a', '192k',
+            archivo_recortado
         ], check=True)
 
         # Limpiar archivo original
