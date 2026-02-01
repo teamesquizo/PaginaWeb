@@ -1,3 +1,5 @@
+# officialknz pagina/appyt.py
+
 from flask import Flask, request, jsonify, send_file, after_this_request
 from flask_cors import CORS
 import yt_dlp
@@ -5,33 +7,32 @@ import os
 import subprocess
 import time
 
-# --- Configuración Flask ---
 app = Flask(__name__, static_folder='frontend', static_url_path='')
 CORS(app)
 
-# --- Rutas y variables ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FFMPEG_EXE = 'ffmpeg'  # Usa el ffmpeg instalado en el sistema
+FFMPEG_EXE = "ffmpeg"  # Usamos ffmpeg del sistema
 DOWNLOAD_FOLDER = os.path.join(BASE_DIR, 'descargas_temp')
 
 if not os.path.exists(DOWNLOAD_FOLDER):
     os.makedirs(DOWNLOAD_FOLDER)
 
-# --- Rutas del frontend ---
+# Ruta principal
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
 
+# Servir archivos estáticos
 @app.route('/<path:path>')
 def static_files(path):
     return app.send_static_file(path)
 
-# --- API para info del vídeo ---
+# API: Obtener info del video
 @app.route('/api/info', methods=['POST'])
 def get_info():
     try:
         url = request.json.get('url')
-        ydl_opts = {'quiet': True, 'ffmpeg_location': None}
+        ydl_opts = {'quiet': True, 'ffmpeg_location': FFMPEG_EXE}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             return jsonify({
@@ -42,7 +43,7 @@ def get_info():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-# --- API para descargar y recortar ---
+# API: Descargar y recortar
 @app.route('/api/descargar', methods=['GET'])
 def descargar():
     url = request.args.get('url')
@@ -50,14 +51,14 @@ def descargar():
     fin = float(request.args.get('fin', 0))
 
     timestamp = int(time.time())
-    archivo_completo = os.path.join(DOWNLOAD_FOLDER, f"input_{timestamp}.mp3")
+    archivo_completo = os.path.join(DOWNLOAD_FOLDER, f"input_{timestamp}.webm")
     archivo_recortado = os.path.join(DOWNLOAD_FOLDER, f"output_{timestamp}.mp3")
 
     try:
-        # 1. Descarga
+        # Descargar audio
         ydl_opts = {
             'format': 'bestaudio/best',
-            'ffmpeg_location': None,
+            'ffmpeg_location': FFMPEG_EXE,
             'outtmpl': os.path.join(DOWNLOAD_FOLDER, f"input_{timestamp}.%(ext)s"),
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
@@ -69,14 +70,14 @@ def descargar():
             info = ydl.extract_info(url, download=True)
             titulo_real = info.get('title', 'audio_knz')
 
-        # 2. Recorte
+        # Recorte
         duracion = fin - inicio
         subprocess.run([
             FFMPEG_EXE, '-y', '-ss', str(inicio), '-t', str(duracion),
             '-i', archivo_completo, '-acodec', 'copy', archivo_recortado
         ], check=True)
 
-        # 3. Limpieza del archivo original
+        # Limpiar archivo original
         if os.path.exists(archivo_completo):
             os.remove(archivo_completo)
 
@@ -91,7 +92,6 @@ def descargar():
 
         nombre_archivo = "".join([x for x in titulo_real if x.isalnum() or x in " -_."]).strip() + ".mp3"
 
-        # 4. Enviar archivo
         return send_file(
             archivo_recortado,
             as_attachment=True,
@@ -100,12 +100,9 @@ def descargar():
         )
 
     except Exception as e:
-        # Limpieza en caso de error
         if os.path.exists(archivo_completo): os.remove(archivo_completo)
         if os.path.exists(archivo_recortado): os.remove(archivo_recortado)
         return jsonify({'error': str(e)}), 500
 
-# --- Arranque del servidor ---
 if __name__ == '__main__':
-    PORT = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=PORT)
+    app.run(host='0.0.0.0', port=5000)
