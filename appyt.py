@@ -1,5 +1,3 @@
-# officialknz pagina/appyt.py
-
 from flask import Flask, request, jsonify, send_file, after_this_request
 from flask_cors import CORS
 import yt_dlp
@@ -11,28 +9,23 @@ app = Flask(__name__, static_folder='frontend', static_url_path='')
 CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FFMPEG_EXE = "/usr/bin/ffmpeg"  # ffmpeg del sistema Linux
+# En Ubuntu 24.04, suele estar en /usr/bin/ffmpeg. 'ffmpeg' a secas suele bastar si está en el PATH.
+FFMPEG_PATH = "ffmpeg" 
 DOWNLOAD_FOLDER = os.path.join(BASE_DIR, 'descargas_temp')
 
+# Asegurar permisos de escritura
 if not os.path.exists(DOWNLOAD_FOLDER):
-    os.makedirs(DOWNLOAD_FOLDER)
+    os.makedirs(DOWNLOAD_FOLDER, mode=0o777, exist_ok=True)
 
-# Ruta principal
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
 
-# Servir archivos estáticos
-@app.route('/<path:path>')
-def static_files(path):
-    return app.send_static_file(path)
-
-# API: Obtener info del video
 @app.route('/api/info', methods=['POST'])
 def get_info():
     try:
         url = request.json.get('url')
-        ydl_opts = {'quiet': True, 'ffmpeg_location': FFMPEG_EXE}
+        ydl_opts = {'quiet': True, 'noplaylist': True}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             return jsonify({
@@ -43,54 +36,49 @@ def get_info():
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
-# API: Descargar y recortar
 @app.route('/api/descargar', methods=['GET'])
 def descargar():
     url = request.args.get('url')
     inicio = float(request.args.get('inicio', 0))
     fin = float(request.args.get('fin', 0))
-
+    
     timestamp = int(time.time())
-    archivo_yt_mp3 = os.path.join(DOWNLOAD_FOLDER, f"input_{timestamp}.mp3")
+    # Usamos .m4a como intermedio porque yt-dlp lo baja más rápido, luego FFmpeg lo corta y pasa a mp3
+    archivo_raw = os.path.join(DOWNLOAD_FOLDER, f"raw_{timestamp}.m4a")
     archivo_recortado = os.path.join(DOWNLOAD_FOLDER, f"output_{timestamp}.mp3")
 
     try:
-        # Descargar audio directamente a MP3
+        # 1. Descargar audio base
         ydl_opts = {
             'format': 'bestaudio/best',
-            'ffmpeg_location': FFMPEG_EXE,
-            'outtmpl': archivo_yt_mp3,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-            'quiet': True
+            'outtmpl': archivo_raw,
+            'quiet': True,
+            'noplaylist': True,
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             titulo_real = info.get('title', 'audio_knz')
 
-        # Recorte del MP3 descargado
+        # 2. Recorte y conversión profesional con FFmpeg
         duracion = fin - inicio
-        subprocess.run([
-            FFMPEG_EXE, '-y', '-ss', str(inicio), '-t', str(duracion),
-            '-i', archivo_yt_mp3,
+        # Comando optimizado: busca rápido con -ss antes de -i
+        comando = [
+            FFMPEG_PATH, '-y',
+            '-ss', str(inicio),
+            '-t', str(duracion),
+            '-i', archivo_raw,
             '-vn', '-ar', '44100', '-ac', '2', '-b:a', '192k',
             archivo_recortado
-        ], check=True)
-
-        # Limpiar archivo original
-        if os.path.exists(archivo_yt_mp3):
-            os.remove(archivo_yt_mp3)
+        ]
+        subprocess.run(comando, check=True)
 
         @after_this_request
         def cleanup(response):
             try:
-                if os.path.exists(archivo_recortado):
-                    os.remove(archivo_recortado)
-            except:
-                pass
+                if os.path.exists(archivo_raw): os.remove(archivo_raw)
+                if os.path.exists(archivo_recortado): os.remove(archivo_recortado)
+            except Exception as e:
+                print(f"Error borrando: {e}")
             return response
 
         nombre_archivo = "".join([x for x in titulo_real if x.isalnum() or x in " -_."]).strip() + ".mp3"
@@ -103,9 +91,9 @@ def descargar():
         )
 
     except Exception as e:
-        if os.path.exists(archivo_yt_mp3): os.remove(archivo_yt_mp3)
-        if os.path.exists(archivo_recortado): os.remove(archivo_recortado)
+        if os.path.exists(archivo_raw): os.remove(archivo_raw)
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    # Importante: para VPS necesitas host 0.0.0.0
+    app.run(host='0.0.0.0', port=5000, debug=False)
