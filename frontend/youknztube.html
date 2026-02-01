@@ -62,20 +62,6 @@
             background: radial-gradient(circle at 50% 50%, #111 0%, #050505 100%);
             overflow: hidden;
         }
-
-        .orb {
-            position: absolute;
-            width: 600px; height: 600px;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.15;
-            animation: float-bg 20s infinite alternate ease-in-out;
-        }
-
-        .orb-1 { background: var(--neon-blue); top: -10%; left: -10%; }
-        .orb-2 { background: var(--neon-pink); bottom: -10%; right: -10%; animation-delay: -5s; }
-        .orb-3 { background: var(--neon-red); top: 40%; left: 30%; animation-duration: 25s; opacity: 0.1; }
-
         .grid {
             position: absolute;
             width: 200%; height: 200%;
@@ -279,15 +265,22 @@
         .noUi-connect { background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink)); }
         .noUi-handle { border-radius: 50% !important; background: #fff !important; width: 18px !important; height: 18px !important; border: none !important; }
         .noUi-handle::before, .noUi-handle::after { display: none !important; }
+
+        /* Fondo cyberpunk */
+        .cyberpunk-bg {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+
+        background:
+            radial-gradient(circle at 15% 80%, #ff2fdc55, transparent 45%),
+            radial-gradient(circle at 85% 80%, #2fdcff55, transparent 45%),
+            linear-gradient(135deg, #13001a, #00142a);
+        }
     </style>
 </head>
 <body>
-    <div class="cyber-bg">
-        <div class="grid"></div>
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-    </div>
+    <div class="cyberpunk-bg"></div>
 
     <div class="nav-wrapper">
         <nav class="navbar navbar-expand navbar-cyber">
