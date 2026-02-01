@@ -11,7 +11,7 @@ app = Flask(__name__, static_folder='frontend', static_url_path='')
 CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FFMPEG_EXE = "ffmpeg"  # Usamos ffmpeg del sistema
+FFMPEG_EXE = "/usr/bin/ffmpeg"  # Usamos ffmpeg del sistema
 DOWNLOAD_FOLDER = os.path.join(BASE_DIR, 'descargas_temp')
 
 if not os.path.exists(DOWNLOAD_FOLDER):
