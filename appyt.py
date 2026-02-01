@@ -11,18 +11,35 @@ CORS(app)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNLOAD_FOLDER = os.path.join(BASE_DIR, 'descargas_temp')
 
-# Asegurar que la carpeta existe al arrancar
+# Asegurar que la carpeta existe
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
+# --- RUTAS PARA LAS PÁGINAS ---
+
 @app.route('/')
+@app.route('/inicio')
 def index():
     return app.send_static_file('index.html')
+
+@app.route('/youknztube.html')
+def youknztube():
+    return app.send_static_file('youknztube.html')
+
+@app.route('/rustknz.html')
+def rustknz():
+    return app.send_static_file('rustknz.html')
+
+@app.route('/utilidadcounter.html')
+def utilidadcounter():
+    # Nota: Nginx pedirá esto cuando el usuario entre a /UtilidadCounter
+    return app.send_static_file('utilidadcounter.html')
+
+# --- API DE DESCARGA ---
 
 @app.route('/api/info', methods=['POST'])
 def get_info():
     try:
         url = request.json.get('url')
-        # 'noplaylist' evita errores si pegas un link de una lista
         ydl_opts = {'quiet': True, 'noplaylist': True}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -42,12 +59,10 @@ def descargar():
     duracion = fin - inicio
 
     timestamp = int(time.time())
-    # Descargamos con un nombre único para evitar conflictos
     archivo_descarga = os.path.join(DOWNLOAD_FOLDER, f"temp_{timestamp}.%(ext)s")
     archivo_final = os.path.join(DOWNLOAD_FOLDER, f"final_{timestamp}.mp3")
 
     try:
-        # FASE 1: Descarga del audio original
         ydl_opts = {
             'format': 'bestaudio/best',
             'outtmpl': archivo_descarga,
@@ -60,8 +75,6 @@ def descargar():
             path_descargado = ydl.prepare_filename(info)
             titulo_real = info.get('title', 'audio_knz')
 
-        # FASE 2: Recorte y conversión a MP3 con FFmpeg
-        # Usamos 'ffmpeg' a secas porque en Ubuntu 24.04 ya está en el PATH global
         subprocess.run([
             'ffmpeg', '-y', 
             '-ss', str(inicio), 
@@ -71,7 +84,6 @@ def descargar():
             archivo_final
         ], check=True)
 
-        # FASE 3: Limpieza automática tras enviar
         @after_this_request
         def cleanup(response):
             try:
@@ -93,6 +105,13 @@ def descargar():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# --- SERVIR OTROS ESTÁTICOS (JS, CSS, IMÁGENES) ---
+@app.route('/<path:path>')
+def static_proxy(path):
+    return app.send_static_file(path)
+
 if __name__ == '__main__':
-    # Importante: host 0.0.0.0 para que sea accesible desde internet
-    app.run(host='0.0.0.0', port=80)
+    # Importante: Como usas Nginx como proxy, 
+    # volvemos al puerto 5000 para que Nginx "hable" con Flask internamente.
+    # El puerto 80 lo maneja Nginx.
+    app.run(host='127.0.0.1', port=5000)
