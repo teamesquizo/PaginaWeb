@@ -51,37 +51,38 @@ def descargar():
     fin = float(request.args.get('fin', 0))
 
     timestamp = int(time.time())
-    archivo_completo = os.path.join(DOWNLOAD_FOLDER, f"input_{timestamp}.webm")
+    archivo_yt_mp3 = os.path.join(DOWNLOAD_FOLDER, f"input_{timestamp}.mp3")
     archivo_recortado = os.path.join(DOWNLOAD_FOLDER, f"output_{timestamp}.mp3")
 
     try:
-        # Descargar audio
+        # Descargar audio directamente a MP3
         ydl_opts = {
             'format': 'bestaudio/best',
             'ffmpeg_location': FFMPEG_EXE,
-            'outtmpl': os.path.join(DOWNLOAD_FOLDER, f"input_{timestamp}.%(ext)s"),
+            'outtmpl': archivo_yt_mp3,
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
                 'preferredquality': '192',
             }],
+            'quiet': True
         }
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
             titulo_real = info.get('title', 'audio_knz')
 
-        # Recorte con conversión Linux-friendly
+        # Recorte del MP3 descargado
         duracion = fin - inicio
         subprocess.run([
             FFMPEG_EXE, '-y', '-ss', str(inicio), '-t', str(duracion),
-            '-i', archivo_completo,
+            '-i', archivo_yt_mp3,
             '-vn', '-ar', '44100', '-ac', '2', '-b:a', '192k',
             archivo_recortado
         ], check=True)
 
         # Limpiar archivo original
-        if os.path.exists(archivo_completo):
-            os.remove(archivo_completo)
+        if os.path.exists(archivo_yt_mp3):
+            os.remove(archivo_yt_mp3)
 
         @after_this_request
         def cleanup(response):
@@ -102,7 +103,7 @@ def descargar():
         )
 
     except Exception as e:
-        if os.path.exists(archivo_completo): os.remove(archivo_completo)
+        if os.path.exists(archivo_yt_mp3): os.remove(archivo_yt_mp3)
         if os.path.exists(archivo_recortado): os.remove(archivo_recortado)
         return jsonify({'error': str(e)}), 500
 
