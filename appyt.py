@@ -11,30 +11,33 @@ CORS(app)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DOWNLOAD_FOLDER = os.path.join(BASE_DIR, 'descargas_temp')
 
-# Asegurar que la carpeta existe
+# Asegurar que la carpeta de descargas existe
 os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
 
-# --- RUTAS PARA LAS PÁGINAS ---
+# --- RUTAS DE NAVEGACIÓN (Para que Nginx las encuentre) ---
 
 @app.route('/')
 @app.route('/inicio')
+@app.route('/index.html')
 def index():
     return app.send_static_file('index.html')
 
+@app.route('/youknztube')
 @app.route('/youknztube.html')
 def youknztube():
     return app.send_static_file('youknztube.html')
 
+@app.route('/rustknz')
 @app.route('/rustknz.html')
 def rustknz():
     return app.send_static_file('rustknz.html')
 
+@app.route('/utilidad')
 @app.route('/utilidadcounter.html')
-def utilidadcounter():
-    # Nota: Nginx pedirá esto cuando el usuario entre a /UtilidadCounter
+def utilidad():
     return app.send_static_file('utilidadcounter.html')
 
-# --- API DE DESCARGA ---
+# --- API DE DESCARGA (Lógica de YouTube) ---
 
 @app.route('/api/info', methods=['POST'])
 def get_info():
@@ -75,6 +78,7 @@ def descargar():
             path_descargado = ydl.prepare_filename(info)
             titulo_real = info.get('title', 'audio_knz')
 
+        # Recorte y conversión
         subprocess.run([
             'ffmpeg', '-y', 
             '-ss', str(inicio), 
@@ -105,13 +109,11 @@ def descargar():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# --- SERVIR OTROS ESTÁTICOS (JS, CSS, IMÁGENES) ---
+# --- CAPTURADOR GENÉRICO (Para JS, CSS y Fotos) ---
 @app.route('/<path:path>')
 def static_proxy(path):
     return app.send_static_file(path)
 
 if __name__ == '__main__':
-    # Importante: Como usas Nginx como proxy, 
-    # volvemos al puerto 5000 para que Nginx "hable" con Flask internamente.
-    # El puerto 80 lo maneja Nginx.
+    # Escuchamos solo localmente en el 5000 porque Nginx hace de puente
     app.run(host='127.0.0.1', port=5000)
